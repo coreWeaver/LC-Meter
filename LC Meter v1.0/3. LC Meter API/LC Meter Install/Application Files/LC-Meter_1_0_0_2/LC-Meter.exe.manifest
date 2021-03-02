@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="LC-Meter.exe" version="1.0.0.2" publicKeyToken="9150933068de8179" language="en-US" processorArchitecture="x86" type="win32" />
+  <description asmv2:iconFile="lcmeter icon.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="LC-Meter" version="1.0.0.0" publicKeyToken="9150933068DE8179" language="neutral" processorArchitecture="x86" />
+    <commandLine file="LC-Meter.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the 
+          requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+         If you want to utilize File and Registry Virtualization for backward 
+         compatibility then delete the requestedExecutionLevel node.
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="2.0.50727.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="WindowsBase" version="3.0.0.0" publicKeyToken="31bf3856ad364e35" language="neutral" processorArchitecture="msil" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="LC-Meter.exe" size="446496">
+      <assemblyIdentity name="LC-Meter" version="1.0.0.0" publicKeyToken="9150933068DE8179" language="neutral" processorArchitecture="x86" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>kByUnFhBiDupGowesBv3hIeovI4=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="lcmeter icon.ico" size="126564">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+      <dsig:DigestValue>pId+ymmJ0TEmT6NHyjZkt/qPs20=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="LC-Meter.exe.config" size="134">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+      <dsig:DigestValue>ZYVCbF014jyazUw+0nEkH92/ao4=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN={88904078-8F3F-44F1-91CF-8E10CA61FFFD}" issuerKeyHash="bd39affe12fafe65085098dc5b79a4331953296d" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>7Jikf8Mq/BmZ9wOC4VoWxIZPOGY=</DigestValue></Reference></SignedInfo><SignatureValue>eomRfj4GUcV2NPs3IY8dchgqZJ3U7f2iBQF0cC/f1I71F5+TP0pSz37eFm2+Sjte/yU0VoG9J6v8e3KI3A4521jraJBdm6xiTshAbHR+i4NywqDNOxnIV8UhWGC4O7o7Vjz6TGxfuHpD5Gphl5FxVhU0OoE913rT5095f7u+leM=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>vr+ugM9VeD9Vh7jGs5uSbnj36Pj5AhZGRl+u8NbETa3OaKzSwr0e1qbGZaZ9S+Mh0lCz9E2YZ+bw0Thyd+6UVodTiwHYIAlOGQtf6S+vcFrsiogLcHzcoXGZSheVvCG4Ekzl5m28BCr6EAZc8DVmAgG+RAkzqmMzS+mLNTUV44E=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="66384f86c4165ae18203f79919fc2ac37fa498ec" Description="" Url=""><as:assemblyIdentity name="LC-Meter.exe" version="1.0.0.2" publicKeyToken="9150933068de8179" language="en-US" processorArchitecture="x86" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN={88904078-8F3F-44F1-91CF-8E10CA61FFFD}</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>ru9Y1GNUOqB4aljKktvFws0EeM8=</DigestValue></Reference></SignedInfo><SignatureValue>Fd3Gg58zBp4WgcvOit+6QXXflTIuu/siMkk6hMEK/HOIXWXnOMMwUjfHpFaksSu2NDIsTNCvl7NtknbvkZ3YKtw7tyBXp6eILDOL5P96B7QbusXPVl1eA/OkAGUQmSfTJYK9X483bnNCbFlXw/l04t+2smJ6Oq99oWp3n8TAMps=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>vr+ugM9VeD9Vh7jGs5uSbnj36Pj5AhZGRl+u8NbETa3OaKzSwr0e1qbGZaZ9S+Mh0lCz9E2YZ+bw0Thyd+6UVodTiwHYIAlOGQtf6S+vcFrsiogLcHzcoXGZSheVvCG4Ekzl5m28BCr6EAZc8DVmAgG+RAkzqmMzS+mLNTUV44E=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIICMTCCAZqgAwIBAgIQXt+3VdJL9plKSyd2LoBpizANBgkqhkiG9w0BAQUFADBXMVUwUwYDVQQDHkwAewA4ADgAOQAwADQAMAA3ADgALQA4AEYAMwBGAC0ANAA0AEYAMQAtADkAMQBDAEYALQA4AEUAMQAwAEMAQQA2ADEARgBGAEYARAB9MB4XDTIxMDEyMTExMjc0NVoXDTIyMDEyMTE3Mjc0NVowVzFVMFMGA1UEAx5MAHsAOAA4ADkAMAA0ADAANwA4AC0AOABGADMARgAtADQANABGADEALQA5ADEAQwBGAC0AOABFADEAMABDAEEANgAxAEYARgBGAEQAfTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAvr+ugM9VeD9Vh7jGs5uSbnj36Pj5AhZGRl+u8NbETa3OaKzSwr0e1qbGZaZ9S+Mh0lCz9E2YZ+bw0Thyd+6UVodTiwHYIAlOGQtf6S+vcFrsiogLcHzcoXGZSheVvCG4Ekzl5m28BCr6EAZc8DVmAgG+RAkzqmMzS+mLNTUV44ECAwEAATANBgkqhkiG9w0BAQUFAAOBgQADjqqTzRmusiBbZneV5Pu1i41+emPVG6P+M62R3OUii3RUmrFzfKFQv2rQd4iOHwMf61SHFtsCAGGZALOMJ8tHdskPvi4WotJp0II5HDW59qaEGMQJPqv5pypHQOG4Y18WAM+bw8kr3oqMR1O6mob6M3qQbopS71x/G7M1Qd8DOQ==</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>

@@ -1,0 +1,560 @@
+Copyright = 
+Www = 
+Email = 
+Comment = Nokia 3310 Graphic Display Library
+Libversion = 1.0
+Date = February 2014
+Statement = 
+History=
+
+[_GLCD]
+$EXTERNAL _LPMBYTE,WAITMS
+_Init_lcd:
+_LCD_INIT:
+_SET_DISPLAY:
+*#If varexist("_GLCD_PORT_RST")
+* cbi _GLCD_PORT_RST,_glcd_rst		;  reset low
+#Endif 
+  Ldi r24,100				; reset 100 mS
+  Clr R25
+* Call _Waitms
+*#If varexist("_GLCD_PORT_RST")
+* sbi _GLCD_PORT_RST,_glcd_rst		;  reset high
+#Endif 
+* cbi _GLCD_PORT_SCL,_glcd_scl		;  clock low
+*#If varexist("_GLCD_PORT_CS1")
+* sbi _GLCD_PORT_CS1,_glcd_cs1		; disable chip
+#Endif 
+ ldi r24,&H21				; Extended command mode
+ rcall _gwrite_cmd
+ ldi r24,&HC8				; Middle contrast (&H80...&HFF)
+ rcall _gwrite_cmd
+ ldi r24,&H06				; Temperature setting
+ rcall _gwrite_cmd
+ ldi r24,&H13				; Bias 1:48
+ rcall _gwrite_cmd
+ ldi r24,&H20				; Normal command mode
+ rcall _gwrite_cmd
+ ldi r24,&H0C				; Uninverted Screen
+ rcall _gwrite_cmd
+ Ret
+
+; send command or data to LCD =====================================================================
+_gwrite_cmd:
+_Lcd_control:
+* cbi _GLCD_PORT_a0,_glcd_a0 		; command -  DC=0
+  Rjmp _Gwrite_DataMisc 			; same code
+
+_gwrite_data:
+*  sbi _GLCD_PORT_a0,_glcd_a0		; data -  DC=1
+  
+* #IF varexist("Negative_lcd")
+*   #IF Negative_lcd > 0 
+      com r24				; Inverted Screen 
+   #Endif
+#Endif 
+
+*#If varexist("Rotate_lcd")
+  *#If Rotate_lcd>0
+   mov r25,r24
+   bst r25,0
+   bld r24,7
+   bst r25,1
+   bld r24,6
+   bst r25,2
+   bld r24,5
+   bst r25,3
+   bld r24,4
+   bst r25,4
+   bld r24,3
+   bst r25,5
+   bld r24,2
+   bst r25,6
+   bld r24,1
+   bst r25,7
+   bld r24,0
+    #Endif
+#Endif 
+
+_gwrite_datamisc:
+  push r23
+*#If varexist("_GLCD_PORT_CS1")
+*  cbi _GLCD_PORT_CS1,_glcd_cs1        	; enable chip -  CS=0 
+#Endif 
+  ldi r25,8                            	; 8 bits
+_gwrite_datamisc8:
+  lsl r24                              	; bit into carry
+  brcc _gwrite_datamisc_0             	; bit was 0
+*  sbi  _GLCD_PORT_SI, _glcd_si		; set bit
+  rjmp _gwrite_datamisc_next
+_gwrite_datamisc_0:
+* cbi  _GLCD_PORT_SI, _glcd_si		; clear bit
+_gwrite_datamisc_next:
+  @genus(1)
+* sbi _GLCD_PORT_SCL,_glcd_scl		; SCL=1
+  @genus(1)
+* cbi _GLCD_PORT_SCL,_glcd_scl		; SCL=0
+ dec r25
+ brne _gwrite_datamisc8			; do 8 bits
+*#If varexist("_GLCD_PORT_CS1")
+* sbi _GLCD_PORT_CS1,_glcd_cs1		; disable chip -  CS=1
+#Endif 
+ pop r23
+ret
+
+
+;there is no difference between clear text and clear graphics!==================================================
+_clear_graph:
+_clear_text:
+  Ldi r24,&H20				; normal command mode
+  Rcall _gwrite_cmd
+  Ldi r24,&H40				; row 0
+  Rcall _gwrite_cmd
+  Ldi r24,&H80				; column 0
+  Rcall _gwrite_cmd				 
+  ldi r16,0
+  Ldi r17,84				; 84 pages
+  Clr r24
+_clear_graph1:
+  rcall _GWrite_data			; write 0
+  Dec r17
+  Brne _clear_graph1			; write 84 times
+  Inc r16
+  Cpi r16,6 				; 6 rows 
+  Brne _clear_graph1
+ret
+
+
+;character in r24  ============================================================================
+;in order to draw multiple fontsizes the fontdata stores the
+;number of bytes and the number of rows.
+;  .db 1,8,8,0  , means 1 row, 8 bits width, block size total, last param is spacing for true type fonts
+_gwrite_lcdchar:
+$EXTERNAL _LPMBYTE, _MUL8, _GLOCATE
+  Push r30                      ; save registers
+  Push r31
+  lds r21,{___lcdrow}           ; the row
+  push r21                  	; save it
+  lds r7,{___lcdcol}
+  Lds r30 ,{___fonttable}	; start of font data
+  Lds r31 ,{___fonttable +1}
+#IF _ROMSIZE>65536
+* In R3,RAMPZ                   ; save RAMPZ page
+* Lds r0,{___fonttable +2}      ; load page number for the used font
+* Out RampZ,r0                  ; set page number
+#ENDIF
+  Call _lpmbyte                 ; Get Y Bytes 1 For Example
+  mov r18,r0                    ; save Y
+  call _lpmbyte                 ; get X bytes , 8 for  an 8*8 font
+  mov r19,r0                    ; save X
+  call _lpmbyte                 ; get blocksize
+  mov r16,r0                    ; in accu
+  call _lpmbyte                 ; get blocksize
+  mov r22,r0                    ; spacing, should be 1 or 2
+
+  subi r24,32                   ; chars start at 32 (space)
+  mov r20,r24
+  call _mul8                    ; get offset
+
+  Add r30,r20                   ; add to start of font data
+  Adc r31,r21
+#IF _ROMSIZE>65536
+  rcall _glcd_rampcheck_inc     ; check boundery
+#ENDIF
+ ;--------optional true type option ----
+ clr r12
+ ;we need to determine the left space of the character so that we can skip these zeros
+ ;we store the left in r15
+ clr r1                                  ; we need a reg with zero
+ mov r14,r18                             ; Y bytes
+ cpi r22,0                               ; test for 0
+ breq _gwrite_lcdchar_rows               ; it is 0 so skip this option
+ clr r13
+ dec r13                                 ; put 255 into r13
+ mov r12,r13                             ; and also in r12
+_truetypey:
+ clr r15
+ mov r16,r19                             ; x bits
+_trueTypeX:
+  call _lpmbyte                          ; get data in r0
+  breq _trueType1                        ; it is zero so skip
+  dec r16                                ; adjust
+  Add r30,r16                            ; skip the rest of the bytes
+  Adc r31,r1                             ; add zero
+#IF _ROMSIZE>65536
+  rcall _glcd_rampcheck_inc              ; check boundery
+#ENDIF
+  rjmp  _truetype2                       ; skip code
+_truetype1:
+  inc r15                                ; inc zero bytes counter
+  dec r16
+brne _trueTypeX                          ; check the other x bytes
+_truetype2:
+ cp r15,r13                              ; check the previous with the new value
+ brsh _truetype3                         ; if r15 same or higher then we skip
+ mov r13,r15                             ;save the smallest in r13
+_truetype3:
+ dec r14                                 ; next row of bytes
+ brne _trueTypeY                         ; check again for Y
+ ;now r13 contains the number of left bytes to skip
+ ;we now check the same in reverse so we get the rgt space and the Z pointe is at the right pos
+ mov r14,r18                             ; Y bytes
+_truetypeyr:
+ clr r15
+ mov r16,r19                             ; x bits
+_truetypexr:
+  sbiw r30,1                             ; dec Z pointer
+#IF _ROMSIZE>65536
+  rcall _glcd_rampcheck_dec              ; check boundery
+#ENDIF
+ lpm                                     ; get byte
+ tst r0                                  ; test for zero
+ breq _truetype1R
+ dec r16
+ sub r30,r16
+ sbc r31,r1
+#IF _ROMSIZE>65536
+  rcall _glcd_rampcheck_dec              ; check boundery
+#ENDIF
+ rjmp _truetype2R
+_truetype1r:
+ inc r15
+ dec r16
+ brne _truetypeXR
+_truetype2r:
+ cp r15,r12
+ brsh _truetype3R
+ mov r12,r15
+_truetype3r:
+ dec r14
+ brne _truetypeYR
+ ;now R12 contains right space
+ cp r13,r19                             ; check if left is empty char
+ brne  _gwrite_lcdchar_rows             ; no so continue
+ mov r13,r22                            ; use defined spaces since a space would be all zero
+ clr r12                                ; clear right space otherwise it mess up
+_gwrite_lcdchar_rows:
+ sts {___lcdcol},r7                     ; restore column
+ mov r23,r19                            ; x bits 8 12 or 16
+ sub r23,r12                            ; minus right space
+
+_gwrite_lcdchar1:
+  lds r20,{___lcdcol}
+  lds r21,{___lcdrow}  
+  push r21
+
+*#If varexist("Rotate_lcd")		
+  *#If Rotate_lcd>0
+  push r25
+  ldi r25,7				; row position
+  sub r25,r21 
+  mov r21,r25
+  pop r25
+    #Endif
+#Endif							
+
+  call _Glocate				; set right position ------------------------------------------------ LOCATE 
+    pop r21
+
+  cpi r22,0					; test for 0
+  breq  _gwrite_lcdchar2		; normal font
+  tst r13						; check spaces
+  breq  _gwrite_lcdchar2		; if zero then skip
+  mov r21,r13				; skips
+_gwrite_lcdcharSkips:
+  call _lpmbyte				; get byte
+  dec r21
+  brne _gwrite_lcdcharSkips
+  sub r23,r13					; adjust x bits
+_gwrite_lcdchar2:
+  call _lpmbyte				; get byte
+  mov r24,r0
+  lds r21,{___LCDrev}		; reverse display?
+  tst r21
+  breq _gwrite_lcdchar3
+  com r24					; not 0 so complement
+_gwrite_lcdchar3:
+ lds r20,{___lcdcol}
+ cpi r20,85				; is it Horisontal offscreen?
+ brge _skip_offscreen 
+
+*#If varexist("Rotate_lcd")		
+  *#If Rotate_lcd>0
+     push r24
+     ldi r24,83					; col position
+     sub r24,r20
+     sbr r24,$80				
+     call _GWrite_cmd
+     pop r24
+     cpi r20,84				; is it Horisontal offscreen?
+     brge _skip_offscreen
+    #Endif
+#Endif
+
+ call _GWrite_data                       ; write char data ------------------------------------------- WRITE DATA
+_skip_offscreen:
+lds r21,{___lcdcol}                     ; increase column
+ inc r21
+ sts {___lcdcol},r21
+ dec r23                                 	; dec bits dones
+ brne _gwrite_lcdchar2		; write all X bytes
+ add r30,r12                             	; move z pointer with right space so we keep the proper pointer value
+ adc r31,r1                              	; r1 was 0
+#IF _ROMSIZE>65536
+  rcall _glcd_rampcheck_inc	; check boundery
+#ENDIF
+ ;now add some space
+ cpi r22,0					; is it true type?
+ breq _gwrite_lcdchar5		; no so exit
+ lds r21,{___LCDrev}			; reverse display?
+ mov r23,r22				; right space columns
+_gwrite_rightspace:
+ clr r24
+ tst r21						; test inverse
+ breq _gwrite_rightspace2	; skip if normal
+ com r24					; inverse
+_gwrite_rightspace2:
+ call _GWrite_data			; write char data -----------------------------------------------------------	
+ dec r23
+ brne _gwrite_rightspace
+ lds r21,{___lcdcol}			; increase column
+ add r21,r22
+ sts {___lcdcol},r21
+_gwrite_lcdchar5:
+ lds r21,{___lcdrow}			; inc row
+ inc r21
+ sts {___lcdrow},r21
+ dec r18						; dec rows
+ breq _gwrite_lcdchar4		; all done so skip code
+ rjmp _gwrite_lcdchar_rows	; for all rows
+
+_gwrite_lcdchar4:
+ pop r21						; get original row back
+ sts {___lcdrow},r21			; restore
+
+#IF _ROMSIZE>65536
+*  OUT RAMPZ, R3			; restore RAMPZ for next character
+#ENDIF
+
+ Pop R31
+ Pop R30
+ret
+
+
+
+#IF _ROMSIZE>65536
+_glcd_rampcheck_inc:
+  Brcc _glcd_rampcheck_inc1                ; no boundery
+  In R2,RAMPZ
+  Inc R2
+  Out RAMPZ,R2
+_glcd_rampcheck_inc1:
+ret
+
+_glcd_rampcheck_dec:
+  Brcc _glcd_rampcheck_dec1                ; no boundery
+  In R2,RAMPZ
+  Dec R2
+  Out RAMPZ,R2
+_glcd_rampcheck_dec1:
+ret
+
+#ENDIF
+[END]
+
+
+[_GLOCATE]
+; called with R21 row  R20 col
+_glocate:
+  Dec r20					; adjust column
+  Dec r21					; adjust row
+_setcol:
+  Ldi r24,&H20				; normal command mode
+  Rcall _gwrite_cmd
+  ldi r24,&H40	
+  add r24,r21
+  rcall _GWrite_cmd			; row address 
+  ldi r24,&H80
+  add r24,r20				
+  rjmp _GWrite_cmd			; column address
+[END]
+
+
+;r22 - x2
+;r20- x1
+;r21 - y
+[_CLS_LINE]
+$EXTERNAL  _GLOCATE
+_Cls_Line:
+  rcall _glocate  ; select right location
+_Cls_Line_loop:
+  lds r24,{___LCDrev}  ;read value to use from reverse
+  rcall _gwrite_data  ; clear
+;  inc r21                    >>> Edit by MWS <<<
+;  cp r21,r22                 >>> Edit by MWS <<<
+  inc r20                    ;>>> Added by MWS <<<
+  cp r20,r22                 ;>>> Added by MWS <<<
+  brlo _Cls_Line_loop
+Ret
+[END]
+
+
+[_getbytefromrom_eprom]
+$EXTERNAL _READEEPROM, _LPMBYTE
+; get a byte from code ROM or from EEPROM
+;you could write code to get the data from an external EEPROM
+_getbytefromrom:
+  Tst R23                          ; is it 0 ?
+  Breq _GetByteFromROM1            ; yes get from flash
+  Clr R26                          ; point to R0
+  Clr R27
+  jmp _ReadEEPROM1                ; get data in r0
+
+_getbytefromrom1:
+  jmp _LpmByte                    ; returns data in r0
+[END]
+
+
+
+[_showpicture]
+$EXTERNAL _DIV8 , _MUL8 , _GETBYTEFROMROM_EPROM , _GLOCATE
+; RLE encoded. When the data after the byte is AA, it means it is a repeating
+; sequence and the byte after it hold the number of repeats
+; AB, AC , AF,AA, EE means show AB,AC and AF EE times
+; needs more code but needs less picture data!
+; show a picture with ShowPic x,y , label
+; y+2 holds X, y+1 holds Y , y+0 holds EPROM/ROM flag, Z points to picture data
+; The calling code uses for example
+; clr r20
+; clr r21
+; st -y,r20      this way it will be referred to with  y+4
+; st -y,r21                   and                      y+3
+
+; ldi zl,low(plaatje * 2)        to point to picture data
+; ldi zh,high(plaatje * 2)
+; in the SED data is stored column after column with 8 rows of data
+_showpicture:
+ CLR R1                           ; repeats
+ CLR R2                           ; char to repeat
+ clr r3                           ; temp register
+ ld r23,y+                        ; 255 means get from EEPROM, 0 means get from flash
+ Call _getbytefromrom             ; Get Height Of Picture In Pixels
+ Mov r16,r0                       ;
+ Ldi r20,8
+ Call _Div8                       ; divide by 8
+ St -y,r16                        ; y+2  number of rows to do
+
+ Call _getbytefromrom             ; Get Width Of Picture In Pixels
+ st -y,r0                         ; number of cols into  y+1
+ st -y,r0                         ; number of cols into  y+0
+
+ ld r16,y+3                       ; get Y pos
+ Ldi R20 , 8			
+ Call _div8                       ; Correct
+ st y+3,r16                       ; save row
+_showpicture1:
+ ld r20,y+4                       ; get X
+mov r15,r20
+ ld r21,y+3                       ; get Y
+ Rcall _setcol                    ; set address  -----------------------------------------------
+
+_showpicture2:
+; *** New RLE encoding routine ***
+  cp r1,r3                        ; is repeats 0 ?
+  brne _ShowPicture8              ; no
+  Call _getbytefromrom            ; Get Next Char
+  mov r2,r0                       ; save char
+  mov r24,r0
+  cpi r24,&HAA                    ; test for repeat char must always be shown
+  breq _ShowPicture9              ; we need to show AA
+  Call _getbytefromrom            ; Is It Rle print
+  mov r24,r0
+  cpi r24,&HAA                    ; is it a RLE encoded char?
+  breq _ShowPicture10             ; yes
+  sbiw R30,1                      ; no readjust pointer to graphic data
+  rjmp _ShowPicture11             ; show it
+
+_showpicture9:
+  adiw r30,1			  ; skip 0
+  rjmp _ShowPicture11
+_showpicture8:
+  ;we are repeating
+  dec r1                          ; adjust repeat counter
+  breq _showpicture2
+  rjmp _ShowPicture11             ; show it
+_showpicture10:
+  Call _getbytefromrom            ; Get Number Of Repeats
+  Mov r24,r0
+  Tst r24                         ; is it zero?
+  Brne _showpicture15             ; no a real sequenc
+  Sbiw r30,2                      ; adjust pointer
+  Rjmp _showpicture11             ; skip somebytes
+_showpicture15:
+  mov r1,r0                       ; save number of repeats
+_showpicture11:
+  mov r24,r2
+; *** end of RLE code ***
+
+;--------------
+  lds r25,{___LCDrev}             ; reverse display?
+  tst r25
+  breq _showpicture12
+  com r24
+_showpicture12:
+;---------------
+  push r24
+  mov r20,r15 
+  ldd r21,y+3
+
+*#If varexist("Rotate_lcd")		
+  *#If Rotate_lcd>0
+  push r20
+  push r21
+  ldi r24,83
+  sub r24,r20
+  mov r20,r24
+  ldi r24,5
+  sub r24,r21
+  mov r21,r24
+    #Endif
+#Endif
+
+Rcall _setcol                    ; set address -----------------------------------------
+
+*#If varexist("Rotate_lcd")		
+  *#If Rotate_lcd>0
+  pop r21
+  pop r20
+     #Endif
+#Endif
+ 
+  pop r24
+  cpi r20,84			; is it Horisontal offscreen?
+  brge _offscreen  
+  cpi r21,7			; is it Vertical offscreen?
+  brge _offscreen
+  rcall _Gwrite_Data		;-------------------------------------------------------	
+_offscreen:
+  inc r15
+
+  ld r24,y+1                      ; get column counter
+  dec r24
+  st y+1,r24                     ; save col counter
+  brne _ShowPicture2	; for all columns
+
+  ld r24,y+3                      ; next page
+  inc r24
+  st y+3,r24
+
+  ld r24,y+0                      ; get num of cols
+  st y+1,r24                      ; save for the new row
+
+  ld r24,y+2                      ; get row counter
+  dec r24
+  st y+2,r24
+  brne _showpicture1a              ; for all rows
+  adiw r28,5                      ; adjust soft stack
+  Ret
+ _showpicture1a:
+   Rjmp _showpicture1
+[END]
