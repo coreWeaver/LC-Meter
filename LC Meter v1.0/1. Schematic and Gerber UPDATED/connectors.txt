@@ -1,0 +1,42 @@
+LC Meter
+coreWeaver/ ioCONNECTED 
+
+
+
+Measuring connectors:
+
+Female connectors (for the case) - Spring-mounted socket:
+
+https://www.reichelt.de/de/en/2-0-mm-miniature-socket-red-mbi-1-rt-p11294.html?search=mbi&&r=1
+
+and
+
+https://www.reichelt.de/de/en/miniature-socket--2-mm-black-mbi-1-sw-p11295.html?&trstct=vrt_pdn&nbc=1
+
+
+The measuring leads:
+
+https://www.reichelt.de/de/en/2-0-mm-mvl-2-50-measuring-lead-red-mvl-2-50-rt-p106057.html?GROUPID=7558&START=0&OFFSET=16&SID=92fe968488052b504d180a23f581dc98fa3e05d01bdc62094114f&LANGUAGE=EN&&r=1
+
+and
+
+https://www.reichelt.de/de/en/2-0-mm-mvl-2-50-measuring-lead-black-mvl-2-50-sw-p106056.html?&trstct=vrt_pdn&nbc=1
+
+
+
+The alligator clips for these leads:
+
+https://www.reichelt.de/de/en/miniature-alligator-clip-2-mm-socket-tin-plated-red-ma-1-s-rt-p130862.html?&trstct=vrt_pdn&nbc=1
+
+and
+
+https://www.reichelt.de/de/en/miniature-alligator-clip-2-mm-socket-tin-plated-black-ma-1-s-sw-p130861.html?GROUPID=7557&START=0&OFFSET=16&SID=92fe968488052b504d180a23f581dc98fa3e05d01bdc62094114f&LANGUAGE=EN&&r=1
+
+
+PCB Probes which will fit on these leads:
+
+https://www.reichelt.de/de/en/test-probe--2-mm-red-mps-1-rt-p13109.html?&trstct=pol_14&nbc=1
+
+and
+
+https://www.reichelt.de/de/en/test-probe--2-mm-black-mps-1-sw-p13110.html?&trstct=vrt_pdn&nbc=1
